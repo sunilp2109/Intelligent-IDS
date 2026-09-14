@@ -60,7 +60,7 @@ class Detection(Base):
     """ML classification stored for an activity record.
 
     explanation stores structured SHAP JSON from Module 6, or null if unexplained.
-    This table does not score risk or trigger blocking.
+    Risk lives in RiskAssessment; this table does not block traffic.
     """
 
     __tablename__ = "detections"
@@ -81,6 +81,10 @@ class Detection(Base):
     )
     attack_log: Mapped[AttackLog | None] = relationship(back_populates="detections")
     analyses: Mapped[list["AttackAnalysis"]] = relationship(
+        back_populates="detection",
+        cascade="all, delete-orphan",
+    )
+    risk_assessments: Mapped[list["RiskAssessment"]] = relationship(
         back_populates="detection",
         cascade="all, delete-orphan",
     )
@@ -111,3 +115,34 @@ class AttackAnalysis(Base):
         server_default=func.now(),
     )
     detection: Mapped[Detection | None] = relationship(back_populates="analyses")
+
+
+class RiskAssessment(Base):
+    """Heuristic risk score and recommended action for a detection.
+
+    BLOCK is stored as a recommendation. This table never triggers a firewall change.
+    """
+
+    __tablename__ = "risk_assessments"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    detection_id: Mapped[int | None] = mapped_column(
+        ForeignKey("detections.id", ondelete="CASCADE"),
+        nullable=True,
+        index=True,
+    )
+    risk_score: Mapped[int] = mapped_column(Integer, nullable=False)
+    risk_level: Mapped[str] = mapped_column(String(16), nullable=False)
+    recommended_action: Mapped[str] = mapped_column(String(16), nullable=False)
+    operator_guidance: Mapped[str] = mapped_column(String(16), nullable=False)
+    execution_status: Mapped[str] = mapped_column(String(32), nullable=False, default="recommendation_only")
+    decision_reason: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    risk_breakdown: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+    overrides_applied: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    inputs_snapshot: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    detection: Mapped[Detection | None] = relationship(back_populates="risk_assessments")

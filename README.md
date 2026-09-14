@@ -4,7 +4,7 @@ Honeypot-Assisted Interpretable AI Architecture for Intelligent Network Intrusio
 
 This repository is a final-year B.E. Computer Science (Cyber Security) project. The system will eventually collect attacker interactions from a controlled honeypot, extract behavioral features, classify activity with machine learning, explain predictions, assign risk, and display results on a security dashboard.
 
-**Current status:** Modules 1–6 (backend, collection, features, ML detection, attack analysis, SHAP explanations).
+**Current status:** Modules 1–7 (backend, collection, features, ML detection, attack analysis, SHAP explanations, risk assessment).
 
 The current honeypot source is a **controlled/simulated JSONL log**. Real Cowrie integration is a later step.
 
@@ -122,6 +122,9 @@ Swagger documentation: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 | GET | `/api/analysis/{detection_id}` | Analyze a stored detection from its AttackLog events |
 | GET | `/api/analysis/thresholds` | Heuristic analysis thresholds |
 | POST | `/api/explain` | SHAP explanation of one ML prediction |
+| GET | `/api/risk/thresholds` | Risk weights, caps, and level thresholds |
+| POST | `/api/risk/assess` | Heuristic risk score and recommended action |
+| GET | `/api/risk/{detection_id}` | Assess a stored detection from analysis + features |
 
 Collector endpoints store observed activity only. They do not classify events as malicious.
 
@@ -213,6 +216,16 @@ python -m ml.scripts.shap_summary --dataset ml\data\raw\development_labeled_feat
 ```
 
 See `ml/explainability/README.md`.
+
+## Module 7 — risk assessment and decision engine
+
+Module 7 scores **how serious** a session looks and recommends ALLOW / ALERT / BLOCK. It does not change the ML class, does not assign an attack category, and does not run SHAP. BLOCK is a recommendation only.
+
+```powershell
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/api/risk/assess -ContentType "application/json" -Body '{"total_events":23,"login_attempts":20,"failed_login_attempts":19,"successful_login_attempts":1,"command_count":3,"unique_command_count":3,"failed_login_ratio":0.95,"attempts_per_minute":12,"commands_per_minute":1.8,"unique_username_count":2,"unique_source_ip_count":1,"session_duration_seconds":100,"events_per_minute":13.8,"repeated_command_count":0,"suspicious_command_indicator":0,"classification":"malicious","confidence_score":0.94,"attack_category":"BRUTE_FORCE","evidence_strength":"HIGH","indicators":["HIGH_FAILED_LOGIN_RATIO","HIGH_LOGIN_ATTEMPT_RATE"]}'
+```
+
+See `ml/risk/README.md`.
 
 ## Testing
 

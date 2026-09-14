@@ -225,3 +225,50 @@ class AnalysisResponse(BaseModel):
     analysis_id: int | None = None
     detection_id: int | None = None
     attack_log_id: int | None = None
+
+
+class RiskAssessRequest(BaseModel):
+    total_events: float
+    login_attempts: float
+    failed_login_attempts: float
+    successful_login_attempts: float
+    command_count: float
+    unique_command_count: float
+    failed_login_ratio: float
+    attempts_per_minute: float
+    commands_per_minute: float
+    unique_username_count: float
+    unique_source_ip_count: float
+    session_duration_seconds: float
+    events_per_minute: float
+    repeated_command_count: float
+    suspicious_command_indicator: float
+    classification: str = Field(..., min_length=1)
+    confidence_score: float = Field(..., ge=0, le=1)
+    attack_category: str = Field(..., min_length=1)
+    evidence_strength: str = Field(..., min_length=1)
+    indicators: list[str] = Field(default_factory=list)
+    detection_id: int | None = Field(default=None, ge=1)
+
+
+class RiskAssessResponse(BaseModel):
+    classification: str
+    ml_confidence: float
+    attack_category: str
+    indicators: list[str]
+    evidence_strength: str
+    features: dict[str, Any]
+    risk_score: int
+    risk_level: str
+    recommended_action: str
+    operator_guidance: str
+    execution_status: str
+    risk_breakdown: dict[str, Any]
+    decision_reason: list[str]
+    overrides_applied: list[str]
+    notes: str
+    action_is_recommendation: bool
+    risk_id: int | None = None
+    detection_id: int | None = None
+    analysis_id: int | None = None
+    attack_log_id: int | None = None

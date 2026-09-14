@@ -13,7 +13,7 @@ category, indicators, evidence
             ↓
     SHAP explanation (Module 6)
             ↓
-    Future risk engine
+    Risk assessment (Module 7)
 ```
 
 **ML classification ≠ attack category.**
@@ -77,4 +77,4 @@ GET  /api/analysis/thresholds
 ## Future improvements
 
 - Calibrate thresholds on labeled sessions
-- Combine analysis + XAI in the dashboard
+- Combine analysis + XAI + risk in the dashboard

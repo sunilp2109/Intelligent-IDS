@@ -200,9 +200,13 @@ If no artifact exists, the API returns HTTP 503. It does not return a fake class
 - Honeypot sessions are not the same as live enterprise traffic.
 - Confidence is a class probability, not certainty.
 - Unknown attacks can be misclassified.
-- This module does not implement SHAP, risk scoring, or blocking. SHAP lives in Module 6 (`ml/explainability/`).
+- This module does not implement SHAP, risk scoring, or blocking. SHAP lives in Module 6 (`ml/explainability/`). Risk lives in Module 7 (`ml/risk/`).
 
 ## Module 6 — explainable AI (SHAP)
 
 See `ml/explainability/README.md`. Module 6 loads this Random Forest and explains one prediction at a time with `shap.TreeExplainer`. It does not train a second model.
+
+## Module 7 — risk assessment
+
+See `ml/risk/README.md`. Module 7 turns classification, analysis, and features into a 0–100 heuristic risk score and a recommended action. It does not execute blocks.
 

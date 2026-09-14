@@ -10,13 +10,14 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.database import Base, engine
-from app.models import AttackAnalysis, AttackLog, Detection, HoneypotEvent  # noqa: F401
+from app.models import AttackAnalysis, AttackLog, Detection, HoneypotEvent, RiskAssessment  # noqa: F401
 from app.routes.analysis import router as analysis_router
 from app.routes.collector import router as collector_router
 from app.routes.detection import router as detection_router
 from app.routes.explain import router as explain_router
 from app.routes.features import router as features_router
 from app.routes.logs import router as logs_router
+from app.routes.risk import router as risk_router
 
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
@@ -43,7 +44,7 @@ async def lifespan(_: FastAPI):
 app = FastAPI(
     title="Intelligent IDS API",
     description="Backend API for the Honeypot-Assisted Interpretable AI IDS.",
-    version="0.6.0",
+    version="0.7.0",
     lifespan=lifespan,
 )
 
@@ -61,6 +62,7 @@ app.include_router(features_router)
 app.include_router(detection_router)
 app.include_router(analysis_router)
 app.include_router(explain_router)
+app.include_router(risk_router)
 
 
 @app.exception_handler(SQLAlchemyError)
