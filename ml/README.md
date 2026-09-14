@@ -112,13 +112,93 @@ python -m ml.scripts.export_features
 - Sessionization by IP + time window is an approximation
 - AttackLog rows created only through `POST /api/logs` (no honeypot events) are not included
 - Suspicious-command matching is substring-based and can false-positive
-- No feature scaling is applied yet
-- No ML training or prediction is performed
 
-## Connection to the future ML module
+## Module 4 — ML detection engine
+
+Module 4 trains a supervised classifier on **labeled behavioral feature vectors** and serves predictions with class probabilities.
 
 ```
-Raw data → feature extraction → preprocessing/scaling → ML model
+Feature vector
+    ↓
+Preprocessing (impute + scale)
+    ↓
+Random Forest
+    ↓
+classification + confidence
 ```
 
-Module 3 stops after feature extraction and vector ordering (`to_feature_vector`). Scaling and model training belong to later modules.
+Current honeypot CSVs are **unlabeled**. The pipeline can be exercised with `ml/data/raw/development_labeled_features.csv`, which is synthetic development data. That file is not a legitimate IDS benchmark.
+
+### Labels
+
+| Label | Meaning |
+| --- | --- |
+| `normal` | Ordinary session behavior |
+| `suspicious` | Unusual but not confirmed malicious behavior |
+| `malicious` | Behavior consistent with hostile activity in the training labels |
+
+Labels must come from the training CSV. The API does not invent them.
+
+### Model
+
+**Random Forest Classifier** is the saved model because the inputs are tabular behavioral features, trees capture non-linear combinations, class probabilities are available, and feature importances exist for later XAI. `class_weight='balanced'` is used because real IDS data is often imbalanced. Logistic Regression is a reasonable later baseline comparison; it is not trained in this module.
+
+Training is 80/20 stratified (`random_state=42`). The test split is not used for fitting.
+
+### Commands
+
+Install ML libraries (already listed in `backend/requirements.txt`):
+
+```powershell
+pip install -r backend\requirements.txt
+```
+
+Build or refresh the development dataset (optional):
+
+```powershell
+python -m ml.scripts.build_development_dataset
+```
+
+Validate a labeled CSV:
+
+```powershell
+python -m ml.models.train --dataset ml\data\raw\development_labeled_features.csv --validate-only
+```
+
+Train, evaluate the hold-out split, and save artifacts:
+
+```powershell
+python -m ml.models.train --dataset ml\data\raw\development_labeled_features.csv
+```
+
+Evaluate a saved model against a labeled file (not a hold-out test if you pass the training file):
+
+```powershell
+python -m ml.evaluation.evaluate --dataset ml\data\raw\development_labeled_features.csv
+```
+
+Artifacts (gitignored):
+
+- `ml/artifacts/intrusion_model.joblib`
+- `ml/artifacts/model_registry.json`
+
+Inference API after training:
+
+```
+POST /api/detection/predict
+GET  /api/detection/model
+```
+
+If no artifact exists, the API returns HTTP 503. It does not return a fake class.
+
+`explanation` on stored detections is always null until the XAI module.
+
+### Limitations
+
+- Model quality depends on labeled training data.
+- The development dataset is too small and too synthetic for production IDS claims.
+- Honeypot sessions are not the same as live enterprise traffic.
+- Confidence is a class probability, not certainty.
+- Unknown attacks can be misclassified.
+- This module does not implement SHAP, risk scoring, or blocking.
+

@@ -101,3 +101,44 @@ class FeatureExtractionResponse(BaseModel):
 class FeatureExportResponse(BaseModel):
     file: str
     count: int
+
+
+class DetectionPredictRequest(BaseModel):
+    total_events: float
+    login_attempts: float
+    failed_login_attempts: float
+    successful_login_attempts: float
+    command_count: float
+    unique_command_count: float
+    failed_login_ratio: float
+    attempts_per_minute: float
+    commands_per_minute: float
+    unique_username_count: float
+    unique_source_ip_count: float
+    session_duration_seconds: float
+    events_per_minute: float
+    repeated_command_count: float
+    suspicious_command_indicator: float
+    log_id: int | None = Field(default=None, ge=1)
+
+
+class DetectionPredictResponse(BaseModel):
+    classification: str
+    confidence_score: float
+    class_probabilities: dict[str, float]
+    model_name: str | None = None
+    model_version: str | None = None
+    dataset_kind: str | None = None
+    detection_id: int | None = None
+    explanation: str | None = None
+
+
+class DetectionRecord(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    attack_log_id: int | None
+    classification: str
+    confidence_score: float
+    explanation: str | None
+    created_at: datetime

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, JSON, String, Text, func
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, JSON, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -22,6 +22,10 @@ class AttackLog(Base):
     status: Mapped[str] = mapped_column(String(64), nullable=False)
     risk_level: Mapped[str] = mapped_column(String(64), nullable=False)
     honeypot_events: Mapped[list["HoneypotEvent"]] = relationship(
+        back_populates="attack_log",
+        cascade="all, delete-orphan",
+    )
+    detections: Mapped[list["Detection"]] = relationship(
         back_populates="attack_log",
         cascade="all, delete-orphan",
     )
@@ -50,3 +54,29 @@ class HoneypotEvent(Base):
         index=True,
     )
     attack_log: Mapped[AttackLog | None] = relationship(back_populates="honeypot_events")
+
+
+class Detection(Base):
+    """ML classification stored for an activity record.
+
+    explanation stays empty until the XAI module. This table does not score risk
+    or trigger blocking.
+    """
+
+    __tablename__ = "detections"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    attack_log_id: Mapped[int | None] = mapped_column(
+        ForeignKey("attack_logs.id", ondelete="CASCADE"),
+        nullable=True,
+        index=True,
+    )
+    classification: Mapped[str] = mapped_column(String(32), nullable=False)
+    confidence_score: Mapped[float] = mapped_column(Float, nullable=False)
+    explanation: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    attack_log: Mapped[AttackLog | None] = relationship(back_populates="detections")

@@ -4,7 +4,7 @@ Honeypot-Assisted Interpretable AI Architecture for Intelligent Network Intrusio
 
 This repository is a final-year B.E. Computer Science (Cyber Security) project. The system will eventually collect attacker interactions from a controlled honeypot, extract behavioral features, classify activity with machine learning, explain predictions, assign risk, and display results on a security dashboard.
 
-**Current status:** Modules 1–3 (backend, honeypot collection, behavioral feature extraction).
+**Current status:** Modules 1–4 (backend, honeypot collection, feature extraction, ML detection pipeline).
 
 The current honeypot source is a **controlled/simulated JSONL log**. Real Cowrie integration is a later step.
 
@@ -47,6 +47,9 @@ The same normalized event format will be used later for Cowrie logs. A future Co
 - python-dotenv
 - SQLite
 - pytest
+- scikit-learn
+- pandas
+- NumPy
 
 ## Installation
 
@@ -111,6 +114,9 @@ Swagger documentation: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 | POST | `/api/collector/import` | Import `honeypot/logs/sample_events.jsonl` (or another project log file) |
 | GET | `/api/features` | Calculate behavioral feature vectors from stored events |
 | POST | `/api/features/export` | Write calculated features to `ml/data/features.csv` |
+| POST | `/api/detection/predict` | Classify a feature vector with the trained model |
+| GET | `/api/detection/model` | Trained model registry, metrics, and feature importance |
+| GET | `/api/detection/{detection_id}` | Stored detection record |
 
 Collector endpoints store observed activity only. They do not classify events as malicious.
 
@@ -153,6 +159,25 @@ python -m ml.scripts.export_features --from-sample
 ```
 
 Optional query parameters: `source_ip`, `log_id`, `window_minutes`.
+
+## Module 4 — ML detection engine
+
+The current honeypot data is **unlabeled**, so a production detector cannot be claimed yet. Module 4 still provides a complete training and inference pipeline.
+
+1. Put a labeled CSV (Module 3 features + `label`) in `ml/data/raw/`, or use the development file for pipeline tests only.
+2. Train (does not run when FastAPI starts):
+
+```powershell
+python -m ml.models.train --dataset ml\data\raw\development_labeled_features.csv
+```
+
+3. Predict:
+
+```powershell
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/api/detection/predict -ContentType "application/json" -Body '{"total_events":4,"login_attempts":4,"failed_login_attempts":3,"successful_login_attempts":1,"command_count":0,"unique_command_count":0,"failed_login_ratio":0.75,"attempts_per_minute":2.5,"commands_per_minute":0,"unique_username_count":1,"unique_source_ip_count":1,"session_duration_seconds":90,"events_per_minute":2.5,"repeated_command_count":0,"suspicious_command_indicator":0}'
+```
+
+If no model artifact exists, this returns HTTP 503. See `ml/README.md` and `ml/data/README.md`.
 
 ## Testing
 

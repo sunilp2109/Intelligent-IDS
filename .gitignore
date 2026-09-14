@@ -34,3 +34,12 @@ build/
 
 # Generated feature exports
 ml/data/features.csv
+
+# Trained model artifacts
+ml/artifacts/*
+!ml/artifacts/.gitkeep
+*.joblib
+
+# Processed ML copies
+ml/data/processed/*
+!ml/data/processed/.gitkeep
