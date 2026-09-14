@@ -1,3 +1,4 @@
+import logging
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -9,10 +10,16 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.database import Base, engine
-from app.models import AttackLog  # noqa: F401  (register model metadata)
+from app.models import AttackLog, HoneypotEvent  # noqa: F401  (register model metadata)
+from app.routes.collector import router as collector_router
 from app.routes.logs import router as logs_router
 
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+
+logging.basicConfig(
+    level=getattr(logging, os.getenv("LOG_LEVEL", "INFO").upper(), logging.INFO),
+    format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
+)
 
 
 def _cors_origins() -> list[str]:
@@ -31,8 +38,8 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(
     title="Intelligent IDS API",
-    description="Backend API foundation for the Honeypot-Assisted Interpretable AI IDS.",
-    version="0.1.0",
+    description="Backend API for the Honeypot-Assisted Interpretable AI IDS.",
+    version="0.2.0",
     lifespan=lifespan,
 )
 
@@ -45,6 +52,7 @@ app.add_middleware(
 )
 
 app.include_router(logs_router)
+app.include_router(collector_router)
 
 
 @app.exception_handler(SQLAlchemyError)

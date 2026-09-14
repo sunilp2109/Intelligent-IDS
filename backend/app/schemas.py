@@ -1,5 +1,6 @@
 from datetime import datetime
 from ipaddress import ip_address as parse_ip_address
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -40,3 +41,42 @@ class AttackLogResponse(BaseModel):
     commands: list[str]
     status: str
     risk_level: str
+
+
+class HoneypotEventIn(BaseModel):
+    timestamp: datetime
+    source_ip: str = Field(..., min_length=1, max_length=64)
+    event_type: str = Field(..., min_length=1, max_length=64)
+    username: str | None = None
+    success: bool | None = None
+    command: str | None = None
+
+    @field_validator("source_ip")
+    @classmethod
+    def validate_source_ip(cls, value: str) -> str:
+        try:
+            parse_ip_address(value)
+        except ValueError as exc:
+            raise ValueError("source_ip must be a valid IPv4 or IPv6 address") from exc
+        return value
+
+
+class IngestEventResponse(BaseModel):
+    result: Literal["inserted", "duplicate"]
+    event_hash: str
+    attack_log_id: int
+    attack_log: AttackLogResponse
+
+
+class ImportRequest(BaseModel):
+    path: str | None = None
+
+
+class ImportReportResponse(BaseModel):
+    file: str
+    parsed: int
+    inserted: int
+    duplicates: int
+    rejected: int
+    errors: list[dict[str, Any]]
+    attack_log_ids: list[int]

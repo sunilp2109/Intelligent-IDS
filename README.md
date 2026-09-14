@@ -4,7 +4,9 @@ Honeypot-Assisted Interpretable AI Architecture for Intelligent Network Intrusio
 
 This repository is a final-year B.E. Computer Science (Cyber Security) project. The system will eventually collect attacker interactions from a controlled honeypot, extract behavioral features, classify activity with machine learning, explain predictions, assign risk, and display results on a security dashboard.
 
-**Current status:** Module 1 only — project foundation and backend API.
+**Current status:** Module 1 (backend foundation) and Module 2 (honeypot data collection and log processing).
+
+The current honeypot source is a **controlled/simulated JSONL log**. Real Cowrie integration is a later step.
 
 ## Module 1 purpose
 
@@ -15,9 +17,27 @@ Module 1 provides a runnable FastAPI backend that can:
 - Validate incoming requests
 - Persist data in SQLite (with a database URL that can later point to PostgreSQL)
 
-This module does **not** include honeypot capture, machine learning, SHAP/XAI, attack classification, the risk engine, the dashboard, or real-time monitoring.
+## Module 2 purpose
 
-## Technologies used (Module 1)
+Module 2 adds the data-collection pipeline:
+
+```
+Simulated honeypot JSONL
+        ↓
+     Log parser
+        ↓
+  Normalized event
+        ↓
+  Ingestion service
+        ↓
+AttackLog database
+```
+
+It can parse raw events, reject malformed records, ingest a single event through the API, import a sample log file, and skip duplicates. It does **not** classify attacks, score risk, or run machine learning.
+
+The same normalized event format will be used later for Cowrie logs. A future Cowrie parser should emit `NormalizedEvent` objects; the ingestion service and database do not need to know the original source.
+
+## Technologies used
 
 - Python 3
 - FastAPI
@@ -26,6 +46,7 @@ This module does **not** include honeypot capture, machine learning, SHAP/XAI, a
 - Pydantic
 - python-dotenv
 - SQLite
+- pytest
 
 ## Installation
 
@@ -58,10 +79,11 @@ Copy the example file if `backend\.env` is not already present:
 copy backend\.env.example backend\.env
 ```
 
-Default Module 1 settings:
+Default settings:
 
 - `DATABASE_URL=sqlite:///./ids.db` — SQLite file created at `backend/ids.db`
 - `CORS_ORIGINS` — localhost origins for a future React frontend
+- `COLLECTOR_SESSION_WINDOW_MINUTES=30` — optional; groups events from the same IP into one AttackLog
 
 To use PostgreSQL later, change `DATABASE_URL` only. Application models do not need to be rewritten.
 
@@ -76,7 +98,7 @@ The API is available at `http://127.0.0.1:8000`.
 
 Swagger documentation: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
-## API endpoints (Module 1)
+## API endpoints
 
 | Method | Path | Purpose |
 | ------ | ---- | ------- |
@@ -85,53 +107,70 @@ Swagger documentation: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 | GET | `/api/logs` | List stored logs |
 | GET | `/api/logs/{log_id}` | Get one log |
 | DELETE | `/api/logs/{log_id}` | Delete one log |
+| POST | `/api/collector/events` | Ingest one normalized honeypot event |
+| POST | `/api/collector/import` | Import `honeypot/logs/sample_events.jsonl` (or another project log file) |
 
-These endpoints store and retrieve activity records only. They do not classify attacks or assign risk automatically.
+Collector endpoints store observed activity only. They do not classify events as malicious.
 
-### Example create request
+## Module 2 data formats
+
+Raw JSONL events (simulated honeypot output):
 
 ```json
 {
   "timestamp": "2026-09-14T10:30:00Z",
-  "ip_address": "192.168.1.10",
-  "attempts": 5,
-  "commands": ["ls", "whoami"],
-  "status": "suspicious",
-  "risk_level": "medium"
+  "source_ip": "192.168.1.50",
+  "event_type": "login_attempt",
+  "username": "admin",
+  "success": false,
+  "command": null
 }
 ```
 
-`timestamp` is optional. If omitted, the server stores the current UTC time.
+Normalized events contain `timestamp`, `source_ip`, `event_type`, `username`, `success`, and `command`. See `honeypot/README.md` for the parser and Cowrie migration plan.
+
+Ingested AttackLog rows use:
+
+- `status`: `collected`
+- `risk_level`: `unscored`
+
+Those placeholders mean “not classified yet.” Later modules will replace them.
 
 ## Testing
 
-1. Confirm the server starts without errors.
-2. Open `/docs` and exercise each endpoint, or use the examples below from another PowerShell window.
-
-Health:
+From the project root, with the virtual environment active:
 
 ```powershell
-Invoke-RestMethod http://127.0.0.1:8000/health
+pytest -q
 ```
 
-Create a log:
+### Manual demonstration
+
+1. Start FastAPI as shown above.
+2. Send a controlled event:
 
 ```powershell
-Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/api/logs -ContentType "application/json" -Body '{"ip_address":"192.168.1.10","attempts":5,"commands":["ls","whoami"],"status":"suspicious","risk_level":"medium"}'
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/api/collector/events -ContentType "application/json" -Body '{"timestamp":"2026-09-14T10:30:00Z","source_ip":"192.168.1.50","event_type":"login_attempt","username":"admin","success":false,"command":null}'
 ```
 
-List logs, fetch one log, then delete it (replace `1` with the returned id):
+3. Confirm it appears in the database:
 
 ```powershell
 Invoke-RestMethod http://127.0.0.1:8000/api/logs
-Invoke-RestMethod http://127.0.0.1:8000/api/logs/1
-Invoke-WebRequest -Method Delete -Uri http://127.0.0.1:8000/api/logs/1
 ```
 
-Expected results:
+4. Import the sample JSONL file:
 
-- `GET /health` returns `{"status":"ok"}`
-- Valid `POST /api/logs` returns HTTP 201 and the stored record
-- Invalid payloads return HTTP 422
-- Missing logs return HTTP 404
-- SQLite data in `backend/ids.db` remains after restarting Uvicorn
+```powershell
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/api/collector/import -ContentType "application/json" -Body '{}'
+```
+
+Or from the project root:
+
+```powershell
+python -m honeypot.scripts.import_logs
+```
+
+Expected import result for the sample file: 11 inserted events (or duplicates if already imported), grouped into 3 AttackLog rows by source IP.
+
+Sending the same event twice returns `"result": "duplicate"` and does not create a second event row.

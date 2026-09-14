@@ -1,0 +1,11 @@
+{"timestamp": "2026-09-14T10:30:00Z", "source_ip": "192.168.1.50", "event_type": "login_attempt", "username": "admin", "success": false, "command": null}
+{"timestamp": "2026-09-14T10:30:08Z", "source_ip": "192.168.1.50", "event_type": "login_attempt", "username": "admin", "success": false, "command": null}
+{"timestamp": "2026-09-14T10:30:17Z", "source_ip": "192.168.1.50", "event_type": "login_attempt", "username": "root", "success": false, "command": null}
+{"timestamp": "2026-09-14T10:30:25Z", "source_ip": "192.168.1.50", "event_type": "login_attempt", "username": "admin", "success": true, "command": null}
+{"timestamp": "2026-09-14T10:31:12Z", "source_ip": "192.168.1.50", "event_type": "command", "username": "admin", "success": true, "command": "whoami"}
+{"timestamp": "2026-09-14T10:31:20Z", "source_ip": "192.168.1.50", "event_type": "command", "username": "admin", "success": true, "command": "ls"}
+{"timestamp": "2026-09-14T10:31:33Z", "source_ip": "192.168.1.50", "event_type": "command", "username": "admin", "success": true, "command": "uname -a"}
+{"timestamp": "2026-09-14T11:05:01Z", "source_ip": "10.0.0.25", "event_type": "login_attempt", "username": "test", "success": false, "command": null}
+{"timestamp": "2026-09-14T11:05:09Z", "source_ip": "10.0.0.25", "event_type": "login_attempt", "username": "test", "success": false, "command": null}
+{"timestamp": "2026-09-14T11:40:44Z", "source_ip": "172.16.0.8", "event_type": "login_attempt", "username": "ubuntu", "success": false, "command": null}
+{"timestamp": "2026-09-14T11:41:10Z", "source_ip": "172.16.0.8", "event_type": "command", "username": "ubuntu", "success": true, "command": "id"}
