@@ -4,7 +4,7 @@ Honeypot-Assisted Interpretable AI Architecture for Intelligent Network Intrusio
 
 This repository is a final-year B.E. Computer Science (Cyber Security) project. The system will eventually collect attacker interactions from a controlled honeypot, extract behavioral features, classify activity with machine learning, explain predictions, assign risk, and display results on a security dashboard.
 
-**Current status:** Module 1 (backend foundation) and Module 2 (honeypot data collection and log processing).
+**Current status:** Modules 1–3 (backend, honeypot collection, behavioral feature extraction).
 
 The current honeypot source is a **controlled/simulated JSONL log**. Real Cowrie integration is a later step.
 
@@ -109,6 +109,8 @@ Swagger documentation: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 | DELETE | `/api/logs/{log_id}` | Delete one log |
 | POST | `/api/collector/events` | Ingest one normalized honeypot event |
 | POST | `/api/collector/import` | Import `honeypot/logs/sample_events.jsonl` (or another project log file) |
+| GET | `/api/features` | Calculate behavioral feature vectors from stored events |
+| POST | `/api/features/export` | Write calculated features to `ml/data/features.csv` |
 
 Collector endpoints store observed activity only. They do not classify events as malicious.
 
@@ -135,6 +137,22 @@ Ingested AttackLog rows use:
 - `risk_level`: `unscored`
 
 Those placeholders mean “not classified yet.” Later modules will replace them.
+
+## Module 3 — behavioral features
+
+Module 3 calculates a **feature vector** from stored honeypot events. It does not train or predict.
+
+See `ml/README.md` for every feature, formula, and the session-grouping rule (source IP + 30-minute window).
+
+After events exist in the database:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/api/features
+python -m ml.scripts.export_features
+python -m ml.scripts.export_features --from-sample
+```
+
+Optional query parameters: `source_ip`, `log_id`, `window_minutes`.
 
 ## Testing
 
@@ -174,3 +192,11 @@ python -m honeypot.scripts.import_logs
 Expected import result for the sample file: 11 inserted events (or duplicates if already imported), grouped into 3 AttackLog rows by source IP.
 
 Sending the same event twice returns `"result": "duplicate"` and does not create a second event row.
+
+5. Calculate behavioral features:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/api/features
+```
+
+The sample import should produce 3 feature vectors. `192.168.1.50` should have `login_attempts = 4`, `failed_login_attempts = 3`, `successful_login_attempts = 1`, `failed_login_ratio = 0.75`, and `command_count = 3`.

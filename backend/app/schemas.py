@@ -80,3 +80,24 @@ class ImportReportResponse(BaseModel):
     rejected: int
     errors: list[dict[str, Any]]
     attack_log_ids: list[int]
+
+
+class FeatureVectorRecord(BaseModel):
+    attack_log_id: int | None = None
+    source_ip: str | None = None
+    source_ips: list[str]
+    session_start: str | None = None
+    session_end: str | None = None
+    features: dict[str, Any]
+    feature_vector: list[float]
+
+
+class FeatureExtractionResponse(BaseModel):
+    count: int
+    grouping: str
+    feature_vectors: list[FeatureVectorRecord]
+
+
+class FeatureExportResponse(BaseModel):
+    file: str
+    count: int

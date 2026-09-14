@@ -31,3 +31,6 @@ Desktop.ini
 node_modules/
 dist/
 build/
+
+# Generated feature exports
+ml/data/features.csv

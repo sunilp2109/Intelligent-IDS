@@ -1,0 +1,124 @@
+# Behavioral feature extraction (Module 3)
+
+Module 3 converts collected honeypot activity into **behavioral features** and a **feature vector** that a later scikit-learn model can consume.
+
+It does **not** train a model, predict a class, score risk, or generate SHAP explanations.
+
+```
+Normalized honeypot events
+        ↓
+Feature extraction
+        ↓
+Behavioral feature vector
+        ↓
+Future ML detection engine
+```
+
+## Session / grouping strategy
+
+The unit of analysis is a **session**, not a single raw log line.
+
+Default grouping (same rule as Module 2 ingestion):
+
+- Group by `source_ip`
+- Keep events in the same session while they fall within 30 minutes of that session’s first timestamp
+- Username is **not** a grouping key. It is counted as `unique_username_count`, so username cycling during brute force stays in one session
+
+This does **not** mean one IP is always one attacker. It is a first sessionization rule. Pass `window_minutes` to `/api/features` to re-sessionize from raw events with a different window later.
+
+## Input format
+
+A list of normalized events:
+
+```json
+{
+  "timestamp": "2026-09-14T10:30:00Z",
+  "source_ip": "192.168.1.50",
+  "event_type": "login_attempt",
+  "username": "admin",
+  "success": false,
+  "command": null
+}
+```
+
+Invalid timestamps or records are skipped. Empty input returns an empty result.
+
+## Output format
+
+Each session has:
+
+- identifiers: `source_ip`, `source_ips`, `session_start`, `session_end`, optional `attack_log_id`
+- `features`: named behavioral features
+- `feature_vector`: the same values in a stable numeric order for scikit-learn
+
+`X` for a future model is a list of `feature_vector` rows. No label is assigned in this module.
+
+## Feature list and formulas
+
+| Feature | Type | Formula |
+| --- | --- | --- |
+| `total_events` | int | Count of valid events |
+| `login_attempts` | int | Count of `login_attempt` events |
+| `failed_login_attempts` | int | `login_attempt` where `success` is false |
+| `successful_login_attempts` | int | `login_attempt` where `success` is true |
+| `command_count` | int | Command events with a non-empty command |
+| `unique_command_count` | int | Distinct command strings |
+| `failed_login_ratio` | float | `failed_login_attempts / login_attempts`, or `0` if there are no login attempts |
+| `attempts_per_minute` | float | `login_attempts / (duration_minutes)` |
+| `commands_per_minute` | float | `command_count / (duration_minutes)` |
+| `unique_username_count` | int | Distinct non-empty usernames |
+| `unique_source_ip_count` | int | Distinct source IPs in the session |
+| `session_duration_seconds` | float | `latest_timestamp - earliest_timestamp` (0 for one event) |
+| `events_per_minute` | float | `total_events / (duration_minutes)` |
+| `repeated_command_count` | int | `command_count - unique_command_count` |
+| `suspicious_command_indicator` | int | `1` if any command contains a documented heuristic pattern, else `0` |
+
+Per-minute rates use a minimum duration of 1 second so a single-event session never produces `inf`.
+
+`suspicious_command_indicator` is a **feature**, not a classification. The patterns (`wget`, `curl`, `nmap`, `/etc/passwd`, and others listed in `feature_extractor.py`) are a transparent heuristic and can be replaced later.
+
+Login attempts with `success` omitted are counted in `login_attempts` but not as failed or successful.
+
+## API
+
+```
+GET /api/features
+GET /api/features?source_ip=192.168.1.50
+GET /api/features?log_id=1
+GET /api/features?window_minutes=15
+POST /api/features/export
+```
+
+Values are calculated from stored `honeypot_events`. They are not hard-coded.
+
+Features are computed dynamically. There is no separate FeatureRecord table.
+
+## CSV generation
+
+From the project root:
+
+```powershell
+python -m ml.scripts.export_features --from-sample
+python -m ml.scripts.export_features
+```
+
+- `--from-sample` writes `ml/data/sample_features.csv` from `honeypot/logs/sample_events.jsonl`
+- default export writes `ml/data/features.csv` from the database
+
+`ml/data/features.csv` is generated output and is gitignored. `sample_features.csv` is committed as a reproducible example calculated from the sample log.
+
+## Known limitations
+
+- Sessionization by IP + time window is an approximation
+- AttackLog rows created only through `POST /api/logs` (no honeypot events) are not included
+- Suspicious-command matching is substring-based and can false-positive
+- No feature scaling is applied yet
+- No ML training or prediction is performed
+
+## Connection to the future ML module
+
+```
+Raw data → feature extraction → preprocessing/scaling → ML model
+```
+
+Module 3 stops after feature extraction and vector ordering (`to_feature_vector`). Scaling and model training belong to later modules.
