@@ -80,3 +80,34 @@ class Detection(Base):
         server_default=func.now(),
     )
     attack_log: Mapped[AttackLog | None] = relationship(back_populates="detections")
+    analyses: Mapped[list["AttackAnalysis"]] = relationship(
+        back_populates="detection",
+        cascade="all, delete-orphan",
+    )
+
+
+class AttackAnalysis(Base):
+    """Behavioral interpretation of an ML detection. Not an XAI explanation."""
+
+    __tablename__ = "attack_analyses"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    detection_id: Mapped[int | None] = mapped_column(
+        ForeignKey("detections.id", ondelete="CASCADE"),
+        nullable=True,
+        index=True,
+    )
+    attack_category: Mapped[str] = mapped_column(String(64), nullable=False)
+    primary_indicator: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    indicators: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    secondary_categories: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    evidence: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+    evidence_strength: Mapped[str] = mapped_column(String(16), nullable=False)
+    features: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+    insufficient_evidence_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    detection: Mapped[Detection | None] = relationship(back_populates="analyses")

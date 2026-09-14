@@ -4,7 +4,7 @@ Honeypot-Assisted Interpretable AI Architecture for Intelligent Network Intrusio
 
 This repository is a final-year B.E. Computer Science (Cyber Security) project. The system will eventually collect attacker interactions from a controlled honeypot, extract behavioral features, classify activity with machine learning, explain predictions, assign risk, and display results on a security dashboard.
 
-**Current status:** Modules 1–4 (backend, honeypot collection, feature extraction, ML detection pipeline).
+**Current status:** Modules 1–5 (backend, collection, features, ML detection, attack analysis).
 
 The current honeypot source is a **controlled/simulated JSONL log**. Real Cowrie integration is a later step.
 
@@ -117,6 +117,9 @@ Swagger documentation: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 | POST | `/api/detection/predict` | Classify a feature vector with the trained model |
 | GET | `/api/detection/model` | Trained model registry, metrics, and feature importance |
 | GET | `/api/detection/{detection_id}` | Stored detection record |
+| POST | `/api/analysis/analyze` | Behavioral attack analysis from features + ML prediction |
+| GET | `/api/analysis/{detection_id}` | Analyze a stored detection from its AttackLog events |
+| GET | `/api/analysis/thresholds` | Heuristic analysis thresholds |
 
 Collector endpoints store observed activity only. They do not classify events as malicious.
 
@@ -178,6 +181,16 @@ Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/api/detection/predict 
 ```
 
 If no model artifact exists, this returns HTTP 503. See `ml/README.md` and `ml/data/README.md`.
+
+## Module 5 — attack analysis
+
+Attack analysis interprets Module 3 features. It does **not** replace the ML class.
+
+```powershell
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/api/analysis/analyze -ContentType "application/json" -Body '{"total_events":23,"login_attempts":20,"failed_login_attempts":19,"successful_login_attempts":1,"command_count":3,"unique_command_count":3,"failed_login_ratio":0.95,"attempts_per_minute":12,"commands_per_minute":1.8,"unique_username_count":2,"unique_source_ip_count":1,"session_duration_seconds":100,"events_per_minute":13.8,"repeated_command_count":0,"suspicious_command_indicator":0,"classification":"malicious","confidence_score":0.94}'
+```
+
+See `ml/analysis/README.md`.
 
 ## Testing
 

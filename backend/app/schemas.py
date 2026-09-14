@@ -142,3 +142,44 @@ class DetectionRecord(BaseModel):
     confidence_score: float
     explanation: str | None
     created_at: datetime
+
+
+class AnalysisRequest(BaseModel):
+    total_events: float
+    login_attempts: float
+    failed_login_attempts: float
+    successful_login_attempts: float
+    command_count: float
+    unique_command_count: float
+    failed_login_ratio: float
+    attempts_per_minute: float
+    commands_per_minute: float
+    unique_username_count: float
+    unique_source_ip_count: float
+    session_duration_seconds: float
+    events_per_minute: float
+    repeated_command_count: float
+    suspicious_command_indicator: float
+    classification: str = Field(..., min_length=1)
+    confidence_score: float = Field(..., ge=0, le=1)
+    detection_id: int | None = Field(default=None, ge=1)
+
+
+class AnalysisResponse(BaseModel):
+    classification: str
+    ml_confidence: float
+    ml_confidence_low: bool
+    attack_category: str
+    primary_category: str
+    secondary_categories: list[str]
+    indicators: list[str]
+    evidence: dict[str, Any]
+    evidence_strength: str
+    insufficient_evidence_reason: str | None = None
+    features: dict[str, Any]
+    feature_names: list[str]
+    analysis_type: str
+    notes: str
+    analysis_id: int | None = None
+    detection_id: int | None = None
+    attack_log_id: int | None = None
