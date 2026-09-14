@@ -4,7 +4,7 @@ Honeypot-Assisted Interpretable AI Architecture for Intelligent Network Intrusio
 
 This repository is a final-year B.E. Computer Science (Cyber Security) project. The system will eventually collect attacker interactions from a controlled honeypot, extract behavioral features, classify activity with machine learning, explain predictions, assign risk, and display results on a security dashboard.
 
-**Current status:** Modules 1–8 (backend, collection, features, ML detection, attack analysis, SHAP, risk assessment, monitoring dashboard).
+**Current status:** Modules 1–9 (backend, collection, features, ML detection, attack analysis, SHAP, risk assessment, monitoring dashboard, WebSocket live streaming).
 
 The current honeypot source is a **controlled/simulated JSONL log**. Real Cowrie integration is a later step.
 
@@ -134,9 +134,10 @@ Swagger documentation: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 | GET | `/api/dashboard/alerts` | High/critical (or filtered) alerts |
 | GET | `/api/dashboard/logs` | Filterable activity logs |
 | GET | `/api/dashboard/events/{detection_id}` | Stored detection + analysis + risk + SHAP |
-| GET | `/api/system/status` | Backend, database, ML artifact, collector mode |
+| GET | `/api/system/status` | Backend, database, ML artifact, collector mode, WebSocket client count |
+| WS | `/ws/events` | Live security-event stream for the dashboard |
 
-Collector endpoints store observed activity only. They do not classify events as malicious.
+Collector endpoints store observed activity. When a trained Module 4 model is present, Module 9 runs the existing detection pipeline after ingest and broadcasts the stored result. They do not invent classifications.
 
 ## Module 2 data formats
 
@@ -256,6 +257,26 @@ python -m scripts.seed_demo_data
 ```
 
 See `frontend/README.md`.
+
+## Module 9 — real-time monitoring
+
+The dashboard keeps REST for history and adds `WS /ws/events` for newly processed pipeline results.
+
+```
+POST /api/collector/events
+        ↓
+Modules 2–7 (existing services)
+        ↓
+Persist detection / analysis / risk
+        ↓
+Broadcast compact JSON
+        ↓
+Live security events (no page reload)
+```
+
+If the Module 4 model is not trained, the event is still stored, but the socket sends `system_status` with `reason=model_unavailable` instead of invented scores.
+
+See `backend/realtime/README.md`.
 
 ## Testing
 

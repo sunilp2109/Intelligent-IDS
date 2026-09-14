@@ -7,8 +7,12 @@ FastAPI aggregates stored records
             ↓
 GET /api/dashboard/* and /api/system/status
             ↓
-React dashboard
+    React dashboard (initial state)
+            ↓
+WS /ws/events live updates
 ```
+
+The UI **displays** backend results. It does not predict, analyze, explain, or score risk. WebSocket messages never replace REST as the historical source of truth.
 
 ## Pages
 
@@ -30,7 +34,17 @@ React dashboard
 - `alerts/AlertList.jsx`
 - `common/` — loading / empty / error / badges
 
-API calls live only in `src/services/api.js`.
+API calls live only in `src/services/api.js`. The live socket lives only in `src/services/websocket.js` (wrapped by `RealtimeProvider`).
+
+Do not create extra WebSocket connections inside page components.
+
+## Live monitoring
+
+The header shows **Connecting / Connected / Disconnected** from the real socket state. It is not hard-coded.
+
+After a drop, the client retries with 1s → 2s → 4s → 8s → 15s backoff, then reloads REST dashboard data before applying new live events.
+
+The dashboard **Live security events** list is this browser session’s WebSocket buffer. Recent events/alerts also merge those rows (deduped by `detection_id`) so a reconnect cannot assume every missed message arrived.
 
 ## Environment
 
@@ -59,7 +73,7 @@ npm install
 npm run dev
 ```
 
-Open [http://127.0.0.1:5173](http://127.0.0.1:5173). CORS already allows this origin.
+Open [http://127.0.0.1:5173](http://127.0.0.1:5173). CORS already allows this origin. The dashboard connects to `ws://127.0.0.1:8000/ws/events`.
 
 ## Empty state
 
@@ -81,6 +95,8 @@ Prefer exercising the real Modules 4–7 APIs when a trained model exists. The s
 cd frontend
 npm test
 ```
+
+WebSocket authentication is **not** implemented. Use the dashboard only in the controlled project environment.
 
 Backend dashboard aggregation:
 

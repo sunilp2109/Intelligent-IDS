@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { DashboardPage } from "../pages/Dashboard";
 import { AttackDetailsPage } from "../pages/AttackDetails";
@@ -49,7 +49,7 @@ test("dashboard shows an error when the API is unavailable", async () => {
   expect((await screen.findAllByRole("alert")).length).toBeGreaterThan(0);
 });
 
-test("navigation exposes operator pages", () => {
+test("navigation exposes operator pages", async () => {
   mockDashboardApis();
   render(
     <MemoryRouter>
@@ -61,6 +61,7 @@ test("navigation exposes operator pages", () => {
   expect(screen.getByText("Activity Logs")).toBeInTheDocument();
   expect(screen.getByText("Attack Analysis")).toBeInTheDocument();
   expect(screen.getByText("System / Model")).toBeInTheDocument();
+  await waitFor(() => expect(screen.getByTestId("ws-status")).toHaveAttribute("data-status", "CONNECTED"));
 });
 
 test("events table renders backend fields", () => {

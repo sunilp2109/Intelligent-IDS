@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
 import { AlertList } from "../components/alerts/AlertList";
 import { EmptyState, ErrorState, LoadingState } from "../components/common/StatusPanels";
+import { useRealtime } from "../context/RealtimeContext";
 import { useApi } from "../hooks/useApi";
 import { api } from "../services/api";
+import { mergeEventRows } from "../utils/realtimeState";
 
 const FILTERS = [
   { label: "High / Critical", value: "HIGH,CRITICAL" },
@@ -14,8 +16,15 @@ const FILTERS = [
 
 export function AlertsPage() {
   const [levels, setLevels] = useState("HIGH,CRITICAL");
-  const { data, error, loading } = useApi(() => api.getAlerts(levels), levels);
-  const counts = useMemo(() => (data ? data.length : 0), [data]);
+  const { liveAlerts, generation } = useRealtime();
+  const { data, error, loading } = useApi(() => api.getAlerts(levels), `${levels}:${generation}`);
+  const wanted = useMemo(() => new Set(levels.split(",").map((item) => item.trim().toUpperCase())), [levels]);
+  const filteredLive = useMemo(
+    () => liveAlerts.filter((item) => wanted.has(String(item.risk_level || "").toUpperCase())),
+    [liveAlerts, wanted],
+  );
+  const merged = mergeEventRows(data, filteredLive, 50);
+  const counts = merged.length;
 
   return (
     <div className="space-y-4">
@@ -35,10 +44,10 @@ export function AlertsPage() {
       </div>
       <div className="panel">
         <div className="border-b border-soc-border px-4 py-3 text-sm text-soc-muted">{counts} matching alerts</div>
-        {loading ? <LoadingState /> : null}
+        {loading && merged.length === 0 ? <LoadingState /> : null}
         {error ? <ErrorState message={error} /> : null}
-        {data && data.length === 0 ? <EmptyState message="No active alerts." /> : null}
-        {data && data.length > 0 ? <AlertList alerts={data} /> : null}
+        {!loading && merged.length === 0 ? <EmptyState message="No active alerts." /> : null}
+        {merged.length > 0 ? <AlertList alerts={merged} /> : null}
       </div>
     </div>
   );

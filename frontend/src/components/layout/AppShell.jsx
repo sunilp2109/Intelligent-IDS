@@ -1,4 +1,6 @@
 import { NavLink } from "react-router-dom";
+import { ConnectionStatus } from "../realtime/ConnectionStatus";
+import { useRealtime } from "../../context/RealtimeContext";
 
 const links = [
   { to: "/", label: "Dashboard" },
@@ -9,6 +11,7 @@ const links = [
 ];
 
 export function AppShell({ children, onRefresh }) {
+  const { status } = useRealtime();
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[220px_1fr]">
       <aside className="border-b border-soc-border bg-soc-panel lg:border-b-0 lg:border-r">
@@ -33,17 +36,20 @@ export function AppShell({ children, onRefresh }) {
         </nav>
       </aside>
       <div className="min-w-0">
-        <header className="flex items-center justify-between border-b border-soc-border px-6 py-4">
+        <header className="flex items-center justify-between gap-4 border-b border-soc-border px-6 py-4">
           <p className="text-sm text-soc-muted">Honeypot-assisted intrusion monitoring</p>
-          {onRefresh ? (
-            <button
-              type="button"
-              onClick={onRefresh}
-              className="rounded border border-soc-border px-3 py-1.5 text-xs uppercase tracking-wide text-soc-muted hover:text-white"
-            >
-              Refresh
-            </button>
-          ) : null}
+          <div className="flex items-center gap-4">
+            <ConnectionStatus status={status} />
+            {onRefresh ? (
+              <button
+                type="button"
+                onClick={onRefresh}
+                className="rounded border border-soc-border px-3 py-1.5 text-xs uppercase tracking-wide text-soc-muted hover:text-white"
+              >
+                Refresh
+              </button>
+            ) : null}
+          </div>
         </header>
         <main className="px-6 py-6">{children}</main>
       </div>

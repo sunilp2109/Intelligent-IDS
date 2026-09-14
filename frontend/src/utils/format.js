@@ -5,6 +5,13 @@ export function formatTime(value) {
   return date.toLocaleString();
 }
 
+export function formatClock(value) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleTimeString();
+}
+
 export function formatPercent(value) {
   if (value === null || value === undefined || Number.isNaN(Number(value))) return "—";
   return `${Math.round(Number(value) * 100)}%`;

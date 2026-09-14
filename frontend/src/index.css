@@ -42,3 +42,16 @@ body {
     @apply inline-flex rounded px-2 py-0.5 text-xs font-semibold uppercase tracking-wide bg-slate-900 text-slate-300 border border-slate-700;
   }
 }
+
+@keyframes live-flash {
+  from {
+    background-color: rgb(127 29 29 / 0.28);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
+.live-alert-row {
+  animation: live-flash 1.6s ease-out;
+}

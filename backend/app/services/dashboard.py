@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.database import DATABASE_URL
 from app.models import AttackAnalysis, AttackLog, Detection, HoneypotEvent, RiskAssessment
+from app.services.websocket_manager import get_connection_manager
 from ml.models.config import model_path
 from ml.models.model_registry import load_registry
 
@@ -377,8 +378,14 @@ def system_status(db: Session) -> dict[str, Any]:
             "events_ingested": events_ingested,
             "sample_log_present": SAMPLE_LOG.is_file(),
         },
+        "realtime": {
+            "websocket_path": "/ws/events",
+            "connected_clients": get_connection_manager().connection_count(),
+            "authentication": "not_implemented",
+        },
         "notes": [
             "BLOCK/CONTAIN is a recommendation only.",
             "Collector status describes simulated JSONL ingestion, not a public honeypot.",
+            "Dashboard WebSocket clients are not authenticated; use only in the controlled project environment.",
         ],
     }

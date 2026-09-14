@@ -5,6 +5,7 @@ TEST_DB = Path(__file__).resolve().parent / "_test_ids.db"
 if TEST_DB.exists():
     TEST_DB.unlink()
 os.environ["DATABASE_URL"] = f"sqlite:///{TEST_DB.resolve().as_posix()}"
+os.environ.setdefault("WS_HEARTBEAT_SECONDS", "0")
 
 import pytest
 from fastapi.testclient import TestClient
@@ -12,14 +13,17 @@ from fastapi.testclient import TestClient
 from app.database import Base, SessionLocal, engine
 from app.main import app
 from app.models import AttackLog, HoneypotEvent  # noqa: F401
+from app.services.websocket_manager import reset_connection_manager
 
 
 @pytest.fixture
 def client():
+    reset_connection_manager()
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     with TestClient(app) as test_client:
         yield test_client
+    reset_connection_manager()
     Base.metadata.drop_all(bind=engine)
 
 

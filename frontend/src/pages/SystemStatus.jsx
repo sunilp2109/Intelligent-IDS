@@ -1,4 +1,5 @@
 import { EmptyState, ErrorState, LoadingState } from "../components/common/StatusPanels";
+import { useRealtime } from "../context/RealtimeContext";
 import { useApi } from "../hooks/useApi";
 import { api } from "../services/api";
 
@@ -15,6 +16,7 @@ function StatusRow({ label, ok, detail }) {
 }
 
 export function SystemStatusPage() {
+  const { status } = useRealtime();
   const { data, error, loading } = useApi(api.getSystemStatus);
   return (
     <div className="panel max-w-3xl">
@@ -42,6 +44,15 @@ export function SystemStatusPage() {
             label="Honeypot collector"
             ok={true}
             detail={`${data.collector?.mode || "simulated_jsonl"} · ${data.collector?.events_ingested ?? 0} ingested events`}
+          />
+          <StatusRow
+            label="Dashboard WebSocket"
+            ok={status === "CONNECTED"}
+            detail={
+              data.realtime
+                ? `${data.realtime.websocket_path || "/ws/events"} · ${data.realtime.connected_clients ?? 0} backend clients · auth ${data.realtime.authentication || "not_implemented"} · UI ${status}`
+                : `UI ${status}`
+            }
           />
           <ul className="space-y-1 px-4 py-3 text-xs text-soc-muted">
             {(data.notes || []).map((note) => (

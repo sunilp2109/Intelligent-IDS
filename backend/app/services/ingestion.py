@@ -44,6 +44,7 @@ class ImportReport:
     rejected: int = 0
     errors: list[dict[str, Any]] = field(default_factory=list)
     attack_log_ids: list[int] = field(default_factory=list)
+    inserted_log_ids: list[int] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -171,6 +172,8 @@ def import_jsonl_file(db: Session, path: str | Path) -> ImportReport:
         log_ids.add(outcome.attack_log_id)
         if outcome.result == "inserted":
             report.inserted += 1
+            if outcome.attack_log_id:
+                report.inserted_log_ids.append(outcome.attack_log_id)
         else:
             report.duplicates += 1
 

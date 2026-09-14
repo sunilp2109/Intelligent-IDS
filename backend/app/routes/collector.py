@@ -13,7 +13,8 @@ from app.schemas import (
     ImportRequest,
     IngestEventResponse,
 )
-from app.services.ingestion import ingest_event, import_jsonl_file
+from app.services.ingestion import import_jsonl_file
+from app.services.pipeline import process_security_event, run_session_pipeline
 from honeypot.parser.log_parser import normalize_event_payload
 
 router = APIRouter(prefix="/api/collector", tags=["collector"])
@@ -47,7 +48,8 @@ def _safe_project_file(path_value: str | None) -> Path:
 def collect_event(payload: HoneypotEventIn, db: Session = Depends(get_db)) -> IngestEventResponse:
     try:
         event = normalize_event_payload(payload.model_dump())
-        outcome = ingest_event(db, event)
+        processed = process_security_event(db, event)
+        outcome = processed.ingest
         attack_log = db.get(AttackLog, outcome.attack_log_id)
         if attack_log is None:
             raise HTTPException(
@@ -81,6 +83,8 @@ def import_events(
     log_path = _safe_project_file(payload.path)
     try:
         report = import_jsonl_file(db, log_path)
+        for log_id in dict.fromkeys(report.inserted_log_ids):
+            run_session_pipeline(db, log_id)
     except SQLAlchemyError as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
