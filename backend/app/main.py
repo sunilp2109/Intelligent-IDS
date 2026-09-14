@@ -64,7 +64,7 @@ async def lifespan(_: FastAPI):
 app = FastAPI(
     title="Intelligent IDS API",
     description="Backend API for the Honeypot-Assisted Interpretable AI IDS.",
-    version="0.9.0",
+    version="0.10.0",
     lifespan=lifespan,
 )
 

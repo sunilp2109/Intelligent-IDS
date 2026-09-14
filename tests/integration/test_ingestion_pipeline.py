@@ -34,6 +34,10 @@ def test_valid_event_ingestion(client):
     assert body["attack_log"]["ip_address"] == "192.168.1.50"
     assert body["attack_log"]["attempts"] == 1
     assert body["attack_log"]["status"] == "collected"
+    # Collector runs the Module 9 pipeline. Tests isolate ML_ARTIFACT_DIR so
+    # there is no trained model here and the log must stay unscored instead of
+    # inventing a classification. With a model present, later pipeline tests
+    # assert a real LOW/MEDIUM/HIGH/CRITICAL value.
     assert body["attack_log"]["risk_level"] == "unscored"
 
     logs = client.get("/api/logs").json()

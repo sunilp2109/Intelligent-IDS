@@ -1,0 +1,123 @@
+{
+  "completed": true,
+  "trained_at": "2026-09-14T14:30:34+00:00",
+  "dataset": "C:\\Users\\Sunil2109\\Desktop\\Intelligent IDS\\ml\\data\\raw\\development_labeled_features.csv",
+  "dataset_sha256": "a2b56b138d2d909f1b725445294aab010da6a6fc3378aba23397dd76ec78125d",
+  "dataset_kind": "development",
+  "dataset_rows": 90,
+  "feature_list": [
+    "total_events",
+    "login_attempts",
+    "failed_login_attempts",
+    "successful_login_attempts",
+    "command_count",
+    "unique_command_count",
+    "failed_login_ratio",
+    "attempts_per_minute",
+    "commands_per_minute",
+    "unique_username_count",
+    "unique_source_ip_count",
+    "session_duration_seconds",
+    "events_per_minute",
+    "repeated_command_count",
+    "suspicious_command_indicator"
+  ],
+  "labels": [
+    "normal",
+    "suspicious",
+    "malicious"
+  ],
+  "train_test_split": {
+    "test_size": 0.2,
+    "random_state": 42,
+    "stratified": true
+  },
+  "model": {
+    "name": "random_forest",
+    "version": "0.4.0-dev",
+    "parameters": {
+      "n_estimators": 100,
+      "max_depth": 8,
+      "min_samples_leaf": 2,
+      "class_weight": "balanced",
+      "random_state": 42
+    },
+    "preprocessing": "SimpleImputer(median) + StandardScaler"
+  },
+  "notes": "Trained on a development/test labeled dataset. These metrics are for pipeline verification only and are not a production IDS evaluation.",
+  "holdout_metrics": {
+    "accuracy": 1.0,
+    "macro_avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0
+    },
+    "weighted_avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0
+    },
+    "per_class": {
+      "normal": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "support": 6
+      },
+      "suspicious": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "support": 6
+      },
+      "malicious": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "support": 6
+      }
+    },
+    "confusion_matrix": {
+      "labels": [
+        "normal",
+        "suspicious",
+        "malicious"
+      ],
+      "matrix": [
+        [
+          6,
+          0,
+          0
+        ],
+        [
+          0,
+          6,
+          0
+        ],
+        [
+          0,
+          0,
+          6
+        ]
+      ]
+    },
+    "averaging": {
+      "macro": "unweighted mean of per-class scores",
+      "weighted": "support-weighted mean of per-class scores"
+    }
+  },
+  "malicious_one_vs_rest": {
+    "positive_class": "malicious",
+    "methodology": "one-vs-rest on the multiclass confusion matrix",
+    "true_positive": 6,
+    "false_positive": 0,
+    "true_negative": 12,
+    "false_negative": 0,
+    "false_positive_rate": 0.0,
+    "false_negative_rate": 0.0,
+    "formula": {
+      "false_positive_rate": "FP / (FP + TN)",
+      "false_negative_rate": "FN / (TP + FN)"
+    }
+  }
+}

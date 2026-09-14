@@ -4,7 +4,7 @@ Honeypot-Assisted Interpretable AI Architecture for Intelligent Network Intrusio
 
 This repository is a final-year B.E. Computer Science (Cyber Security) project. The system will eventually collect attacker interactions from a controlled honeypot, extract behavioral features, classify activity with machine learning, explain predictions, assign risk, and display results on a security dashboard.
 
-**Current status:** Modules 1–9 (backend, collection, features, ML detection, attack analysis, SHAP, risk assessment, monitoring dashboard, WebSocket live streaming).
+**Current status:** Modules 1–10 (backend through evaluation).
 
 The current honeypot source is a **controlled/simulated JSONL log**. Real Cowrie integration is a later step.
 
@@ -277,6 +277,19 @@ Live security events (no page reload)
 If the Module 4 model is not trained, the event is still stored, but the socket sends `system_status` with `reason=model_unavailable` instead of invented scores.
 
 See `backend/realtime/README.md`.
+
+## Module 10 — testing and evaluation
+
+Pytest suites, hold-out ML metrics, and local latency/throughput measurements live under `tests/` and `ml/evaluation/`. Reports are generated from live runs. Nothing is filled in by hand.
+
+```powershell
+pytest
+python -m ml.evaluation.run_experiment
+python tests\performance\benchmark_pipeline.py --iterations 20
+python -m ml.evaluation.generate_report
+```
+
+See `tests/README.md`.
 
 ## Testing
 

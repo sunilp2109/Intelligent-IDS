@@ -1,0 +1,202 @@
+{
+  "generated_at": "2026-09-14T14:30:58+00:00",
+  "dataset_note": "Trained on a development/test labeled dataset. These metrics are for pipeline verification only and are not a production IDS evaluation.",
+  "experiment_file": "C:\\Users\\Sunil2109\\Desktop\\Intelligent IDS\\ml\\evaluation\\results\\experiment_002.json",
+  "ml_metrics": {
+    "accuracy": 1.0,
+    "macro_avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0
+    },
+    "weighted_avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0
+    },
+    "per_class": {
+      "normal": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "support": 6
+      },
+      "suspicious": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "support": 6
+      },
+      "malicious": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "support": 6
+      }
+    },
+    "confusion_matrix": {
+      "labels": [
+        "normal",
+        "suspicious",
+        "malicious"
+      ],
+      "matrix": [
+        [
+          6,
+          0,
+          0
+        ],
+        [
+          0,
+          6,
+          0
+        ],
+        [
+          0,
+          0,
+          6
+        ]
+      ]
+    },
+    "averaging": {
+      "macro": "unweighted mean of per-class scores",
+      "weighted": "support-weighted mean of per-class scores"
+    }
+  },
+  "malicious_one_vs_rest": {
+    "positive_class": "malicious",
+    "methodology": "one-vs-rest on the multiclass confusion matrix",
+    "true_positive": 6,
+    "false_positive": 0,
+    "true_negative": 12,
+    "false_negative": 0,
+    "false_positive_rate": 0.0,
+    "false_negative_rate": 0.0,
+    "formula": {
+      "false_positive_rate": "FP / (FP + TN)",
+      "false_negative_rate": "FN / (TP + FN)"
+    }
+  },
+  "latency": {
+    "feature_extraction": {
+      "count": 15,
+      "min_ms": 0.0365,
+      "max_ms": 0.0624,
+      "mean_ms": 0.0425,
+      "median_ms": 0.0401
+    },
+    "ml_prediction": {
+      "count": 15,
+      "min_ms": 13.3606,
+      "max_ms": 15.1705,
+      "mean_ms": 14.3006,
+      "median_ms": 14.3023
+    },
+    "attack_analysis": {
+      "count": 15,
+      "min_ms": 0.0284,
+      "max_ms": 0.0827,
+      "mean_ms": 0.0378,
+      "median_ms": 0.0336
+    },
+    "shap_explanation": {
+      "count": 15,
+      "min_ms": 24.5524,
+      "max_ms": 39.0771,
+      "mean_ms": 27.1939,
+      "median_ms": 25.8185
+    },
+    "risk_assessment": {
+      "count": 15,
+      "min_ms": 0.0342,
+      "max_ms": 0.0564,
+      "mean_ms": 0.0411,
+      "median_ms": 0.0363
+    },
+    "pipeline_without_xai": {
+      "count": 15,
+      "min_ms": 13.4647,
+      "max_ms": 15.2761,
+      "mean_ms": 14.4221,
+      "median_ms": 14.4176
+    },
+    "pipeline_with_xai": {
+      "count": 15,
+      "min_ms": 38.0195,
+      "max_ms": 53.6711,
+      "mean_ms": 41.616,
+      "median_ms": 40.4895
+    }
+  },
+  "api_latency": {
+    "GET /api/logs": {
+      "count": 15,
+      "min_ms": 1.1071,
+      "max_ms": 11.949,
+      "mean_ms": 2.2477,
+      "median_ms": 1.4872
+    },
+    "GET /api/dashboard/stats": {
+      "count": 15,
+      "min_ms": 2.3779,
+      "max_ms": 19.7726,
+      "mean_ms": 4.3892,
+      "median_ms": 3.3608
+    },
+    "POST /api/detection/predict": {
+      "count": 15,
+      "min_ms": 15.7,
+      "max_ms": 19.7531,
+      "mean_ms": 17.0716,
+      "median_ms": 16.6622
+    },
+    "POST /api/explain": {
+      "count": 15,
+      "min_ms": 27.4918,
+      "max_ms": 29.7144,
+      "mean_ms": 28.3789,
+      "median_ms": 28.2504
+    },
+    "POST /api/risk/assess": {
+      "count": 15,
+      "min_ms": 1.0442,
+      "max_ms": 2.2821,
+      "mean_ms": 1.354,
+      "median_ms": 1.2115
+    }
+  },
+  "end_to_end": {
+    "count": 8,
+    "min_ms": 61.0074,
+    "max_ms": 109.0319,
+    "mean_ms": 73.5985,
+    "median_ms": 66.2126
+  },
+  "websocket": {
+    "note": "WebSocket figure is client receive time after process_security_event started, so it includes pipeline processing plus local broadcast. It is not isolated network RTT.",
+    "e2e_includes_broadcast_ms": {
+      "count": 8,
+      "min_ms": 61.0074,
+      "max_ms": 109.0319,
+      "mean_ms": 73.5985,
+      "median_ms": 66.2126
+    }
+  },
+  "throughput": {
+    "events_processed": 12,
+    "seconds": 0.7563,
+    "events_per_second": 15.866
+  },
+  "functional_tests": {
+    "exit_code": 0,
+    "passed": 166,
+    "failed": 0,
+    "skipped": 0,
+    "coverage_percent": 79.71840429098224,
+    "output_tail": "ml\\models\\predict.py                            45      1    98%\nml\\models\\train.py                              71     19    73%\nml\\preprocessing\\__init__.py                     3      0   100%\nml\\preprocessing\\dataset.py                     85      8    91%\nml\\preprocessing\\feature_extractor.py          122      8    93%\nml\\preprocessing\\feature_schema.py               6      0   100%\nml\\preprocessing\\preprocessor.py                14      0   100%\nml\\risk\\__init__.py                              4      0   100%\nml\\risk\\config.py                               41      0   100%\nml\\risk\\decisions.py                            47      8    83%\nml\\risk\\engine.py                               11      0   100%\nml\\risk\\scorer.py                              115     14    88%\nml\\scripts\\__init__.py                           0      0   100%\nml\\scripts\\build_development_dataset.py         77     16    79%\nml\\scripts\\export_features.py                   42     42     0%\nml\\scripts\\shap_summary.py                      26     26     0%\n----------------------------------------------------------------\nTOTAL                                         2983    605    80%\nCoverage JSON written to file C:\\Users\\Sunil2109\\Desktop\\Intelligent IDS\\ml\\evaluation\\results\\coverage.json\n166 passed, 5 warnings in 16.43s"
+  },
+  "environment_note": "Local development timings on the machine that ran this script. They are not production benchmarks.",
+  "fault_and_security": {
+    "note": "See pytest markers fault/security. Failures are listed in functional_tests.output_tail."
+  }
+}

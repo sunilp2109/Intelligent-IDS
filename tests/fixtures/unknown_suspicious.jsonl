@@ -1,0 +1,2 @@
+{"timestamp": "2026-09-14T12:50:00Z", "source_ip": "203.0.113.60", "event_type": "login_attempt", "username": "guest", "success": true, "command": null}
+{"timestamp": "2026-09-14T12:50:40Z", "source_ip": "203.0.113.60", "event_type": "command", "username": "guest", "success": true, "command": "date"}

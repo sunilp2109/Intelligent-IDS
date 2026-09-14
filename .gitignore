@@ -43,3 +43,13 @@ ml/artifacts/*
 # Processed ML copies
 ml/data/processed/*
 !ml/data/processed/.gitkeep
+
+# Coverage
+.coverage
+htmlcov/
+coverage.xml
+ml/evaluation/results/coverage.json
+
+# Isolated pytest artifact dir (conftest)
+tests/_no_model/
+

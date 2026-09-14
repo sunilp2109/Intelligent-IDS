@@ -1,0 +1,6 @@
+{not json
+{"timestamp": "not-a-date", "source_ip": "203.0.113.90", "event_type": "login_attempt"}
+{"source_ip": "203.0.113.90", "event_type": "login_attempt"}
+{"timestamp": "2026-09-14T12:59:00Z", "event_type": "login_attempt"}
+{"timestamp": "2026-09-14T12:59:01Z", "source_ip": "not-an-ip", "event_type": "login_attempt", "success": false}
+{"timestamp": "2026-09-14T12:59:02Z", "source_ip": "203.0.113.90", "event_type": "command"}

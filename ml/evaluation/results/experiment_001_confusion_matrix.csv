@@ -1,0 +1,4 @@
+actual\predicted,normal,suspicious,malicious
+normal,6,0,0
+suspicious,0,6,0
+malicious,0,0,6

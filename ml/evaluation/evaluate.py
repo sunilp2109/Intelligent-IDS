@@ -54,6 +54,46 @@ def evaluate_predictions(y_true, y_pred, *, labels: tuple[str, ...] = LABELS) ->
     }
 
 
+def one_vs_rest_rates(metrics: dict[str, Any], *, positive_class: str = "malicious") -> dict[str, Any]:
+    """Binary security rates from a multiclass confusion matrix.
+
+    Positive class defaults to malicious: a false negative is a missed attack,
+    a false positive is a non-malicious session labelled malicious.
+    """
+    labels = list(metrics["confusion_matrix"]["labels"])
+    matrix = metrics["confusion_matrix"]["matrix"]
+    if positive_class not in labels:
+        raise ValueError(f"{positive_class} is not in the confusion-matrix labels.")
+    index = labels.index(positive_class)
+    true_positive = int(matrix[index][index])
+    false_negative = int(sum(matrix[index][col] for col in range(len(labels)) if col != index))
+    false_positive = int(sum(matrix[row][index] for row in range(len(labels)) if row != index))
+    true_negative = int(
+        sum(
+            matrix[row][col]
+            for row in range(len(labels))
+            for col in range(len(labels))
+            if row != index and col != index
+        )
+    )
+    fpr_den = false_positive + true_negative
+    fnr_den = true_positive + false_negative
+    return {
+        "positive_class": positive_class,
+        "methodology": "one-vs-rest on the multiclass confusion matrix",
+        "true_positive": true_positive,
+        "false_positive": false_positive,
+        "true_negative": true_negative,
+        "false_negative": false_negative,
+        "false_positive_rate": (false_positive / fpr_den) if fpr_den else None,
+        "false_negative_rate": (false_negative / fnr_den) if fnr_den else None,
+        "formula": {
+            "false_positive_rate": "FP / (FP + TN)",
+            "false_negative_rate": "FN / (TP + FN)",
+        },
+    }
+
+
 def format_evaluation(metrics: dict[str, Any]) -> str:
     lines = [
         f"Accuracy: {metrics['accuracy']:.4f}",
