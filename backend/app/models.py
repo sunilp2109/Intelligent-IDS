@@ -59,8 +59,8 @@ class HoneypotEvent(Base):
 class Detection(Base):
     """ML classification stored for an activity record.
 
-    explanation stays empty until the XAI module. This table does not score risk
-    or trigger blocking.
+    explanation stores structured SHAP JSON from Module 6, or null if unexplained.
+    This table does not score risk or trigger blocking.
     """
 
     __tablename__ = "detections"
@@ -73,7 +73,7 @@ class Detection(Base):
     )
     classification: Mapped[str] = mapped_column(String(32), nullable=False)
     confidence_score: Mapped[float] = mapped_column(Float, nullable=False)
-    explanation: Mapped[str | None] = mapped_column(Text, nullable=True)
+    explanation: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

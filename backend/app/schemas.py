@@ -130,7 +130,7 @@ class DetectionPredictResponse(BaseModel):
     model_version: str | None = None
     dataset_kind: str | None = None
     detection_id: int | None = None
-    explanation: str | None = None
+    explanation: dict[str, Any] | None = None
 
 
 class DetectionRecord(BaseModel):
@@ -140,8 +140,50 @@ class DetectionRecord(BaseModel):
     attack_log_id: int | None
     classification: str
     confidence_score: float
-    explanation: str | None
+    explanation: dict[str, Any] | None
     created_at: datetime
+
+
+class ExplainRequest(DetectionPredictRequest):
+    detection_id: int | None = Field(default=None, ge=1)
+    top_features: int = Field(default=5, ge=1, le=15)
+
+
+class ShapFeatureContribution(BaseModel):
+    feature: str
+    value: float
+    shap_value: float
+    absolute_shap_value: float
+    direction: Literal["increases_prediction", "decreases_prediction", "no_effect"]
+
+
+class ExplanationPayload(BaseModel):
+    prediction: str
+    model_confidence: float
+    explained_class: str
+    base_value: float
+    model_output: float
+    base_values_by_class: dict[str, float] = Field(default_factory=dict)
+    top_features: list[ShapFeatureContribution]
+    feature_contributions: list[ShapFeatureContribution]
+    visual_data: list[dict[str, Any]]
+    summary_text: str
+    shap_version: str
+    explainer_type: str
+    model_type: str
+    limitations: list[str]
+    notes: str
+
+
+class ExplainResponse(BaseModel):
+    classification: str
+    confidence_score: float
+    class_probabilities: dict[str, float]
+    model_name: str | None = None
+    model_version: str | None = None
+    dataset_kind: str | None = None
+    detection_id: int | None = None
+    explanation: ExplanationPayload
 
 
 class AnalysisRequest(BaseModel):

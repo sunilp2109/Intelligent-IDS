@@ -12,6 +12,7 @@ def persist_detection(
     classification: str,
     confidence_score: float,
     log_id: int | None = None,
+    explanation: dict | None = None,
 ) -> Detection:
     if log_id is not None and db.get(AttackLog, log_id) is None:
         raise LookupError(f"Attack log {log_id} was not found.")
@@ -19,7 +20,7 @@ def persist_detection(
         attack_log_id=log_id,
         classification=classification,
         confidence_score=confidence_score,
-        explanation=None,
+        explanation=explanation,
     )
     db.add(record)
     db.commit()

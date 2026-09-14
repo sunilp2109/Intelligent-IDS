@@ -191,7 +191,7 @@ GET  /api/detection/model
 
 If no artifact exists, the API returns HTTP 503. It does not return a fake class.
 
-`explanation` on stored detections is always null until the XAI module.
+`explanation` on stored detections is null until `POST /api/explain` writes structured SHAP JSON to that field.
 
 ### Limitations
 
@@ -200,5 +200,9 @@ If no artifact exists, the API returns HTTP 503. It does not return a fake class
 - Honeypot sessions are not the same as live enterprise traffic.
 - Confidence is a class probability, not certainty.
 - Unknown attacks can be misclassified.
-- This module does not implement SHAP, risk scoring, or blocking.
+- This module does not implement SHAP, risk scoring, or blocking. SHAP lives in Module 6 (`ml/explainability/`).
+
+## Module 6 — explainable AI (SHAP)
+
+See `ml/explainability/README.md`. Module 6 loads this Random Forest and explains one prediction at a time with `shap.TreeExplainer`. It does not train a second model.
 

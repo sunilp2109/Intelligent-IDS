@@ -4,7 +4,7 @@ Honeypot-Assisted Interpretable AI Architecture for Intelligent Network Intrusio
 
 This repository is a final-year B.E. Computer Science (Cyber Security) project. The system will eventually collect attacker interactions from a controlled honeypot, extract behavioral features, classify activity with machine learning, explain predictions, assign risk, and display results on a security dashboard.
 
-**Current status:** Modules 1–5 (backend, collection, features, ML detection, attack analysis).
+**Current status:** Modules 1–6 (backend, collection, features, ML detection, attack analysis, SHAP explanations).
 
 The current honeypot source is a **controlled/simulated JSONL log**. Real Cowrie integration is a later step.
 
@@ -50,6 +50,7 @@ The same normalized event format will be used later for Cowrie logs. A future Co
 - scikit-learn
 - pandas
 - NumPy
+- SHAP
 
 ## Installation
 
@@ -120,6 +121,7 @@ Swagger documentation: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 | POST | `/api/analysis/analyze` | Behavioral attack analysis from features + ML prediction |
 | GET | `/api/analysis/{detection_id}` | Analyze a stored detection from its AttackLog events |
 | GET | `/api/analysis/thresholds` | Heuristic analysis thresholds |
+| POST | `/api/explain` | SHAP explanation of one ML prediction |
 
 Collector endpoints store observed activity only. They do not classify events as malicious.
 
@@ -191,6 +193,26 @@ Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/api/analysis/analyze -
 ```
 
 See `ml/analysis/README.md`.
+
+## Module 6 — explainable AI (SHAP)
+
+Module 6 explains **why the trained Random Forest produced a class**. It does not replace Module 4 or Module 5.
+
+Train the Module 4 model first, then:
+
+```powershell
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/api/explain -ContentType "application/json" -Body '{"total_events":4,"login_attempts":4,"failed_login_attempts":3,"successful_login_attempts":1,"command_count":0,"unique_command_count":0,"failed_login_ratio":0.75,"attempts_per_minute":2.5,"commands_per_minute":0,"unique_username_count":1,"unique_source_ip_count":1,"session_duration_seconds":90,"events_per_minute":2.5,"repeated_command_count":0,"suspicious_command_indicator":0}'
+```
+
+If no model artifact exists, this returns HTTP 503. SHAP values are calculated from the loaded model. They are not hard-coded.
+
+Offline global mean |SHAP| (not used by the API):
+
+```powershell
+python -m ml.scripts.shap_summary --dataset ml\data\raw\development_labeled_features.csv
+```
+
+See `ml/explainability/README.md`.
 
 ## Testing
 

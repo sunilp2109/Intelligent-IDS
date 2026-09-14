@@ -11,7 +11,9 @@ Attack analysis (heuristics)
             ↓
 category, indicators, evidence
             ↓
-Future XAI / risk engine
+    SHAP explanation (Module 6)
+            ↓
+    Future risk engine
 ```
 
 **ML classification ≠ attack category.**
@@ -19,7 +21,7 @@ Future XAI / risk engine
 - The Random Forest (Module 4) outputs `normal` / `suspicious` / `malicious` and a class probability (`ml_confidence`).
 - Attack analysis does **not** re-predict that class. It reads the same feature values and applies documented rules to name a behavior category and list indicators.
 
-SHAP/XAI is not implemented here. The original feature vector and `feature_names` are returned unchanged so Module 6 can explain the ML prediction later.
+SHAP/XAI is implemented in Module 6 (`ml/explainability/`). Attack analysis still returns the original feature vector so SHAP can explain the same inputs. SHAP does not assign `BRUTE_FORCE` or any other category.
 
 ## Attack categories
 
@@ -75,5 +77,4 @@ GET  /api/analysis/thresholds
 ## Future improvements
 
 - Calibrate thresholds on labeled sessions
-- Feed the preserved feature vector into SHAP
 - Combine analysis + XAI in the dashboard
