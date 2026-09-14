@@ -4,7 +4,7 @@ Honeypot-Assisted Interpretable AI Architecture for Intelligent Network Intrusio
 
 This repository is a final-year B.E. Computer Science (Cyber Security) project. The system will eventually collect attacker interactions from a controlled honeypot, extract behavioral features, classify activity with machine learning, explain predictions, assign risk, and display results on a security dashboard.
 
-**Current status:** Modules 1–7 (backend, collection, features, ML detection, attack analysis, SHAP explanations, risk assessment).
+**Current status:** Modules 1–8 (backend, collection, features, ML detection, attack analysis, SHAP, risk assessment, monitoring dashboard).
 
 The current honeypot source is a **controlled/simulated JSONL log**. Real Cowrie integration is a later step.
 
@@ -51,6 +51,7 @@ The same normalized event format will be used later for Cowrie logs. A future Co
 - pandas
 - NumPy
 - SHAP
+- React / Vite / Tailwind CSS / Recharts
 
 ## Installation
 
@@ -125,6 +126,15 @@ Swagger documentation: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 | GET | `/api/risk/thresholds` | Risk weights, caps, and level thresholds |
 | POST | `/api/risk/assess` | Heuristic risk score and recommended action |
 | GET | `/api/risk/{detection_id}` | Assess a stored detection from analysis + features |
+| GET | `/api/dashboard/stats` | Aggregated event/classification/risk counts |
+| GET | `/api/dashboard/timeline` | Daily activity and classification counts |
+| GET | `/api/dashboard/attacks` | Attack-category distribution |
+| GET | `/api/dashboard/risks` | Risk-level distribution |
+| GET | `/api/dashboard/recent` | Recent detections with analysis and risk |
+| GET | `/api/dashboard/alerts` | High/critical (or filtered) alerts |
+| GET | `/api/dashboard/logs` | Filterable activity logs |
+| GET | `/api/dashboard/events/{detection_id}` | Stored detection + analysis + risk + SHAP |
+| GET | `/api/system/status` | Backend, database, ML artifact, collector mode |
 
 Collector endpoints store observed activity only. They do not classify events as malicious.
 
@@ -227,12 +237,34 @@ Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/api/risk/assess -Conte
 
 See `ml/risk/README.md`.
 
+## Module 8 — security monitoring dashboard
+
+The React dashboard reads aggregated FastAPI data. It does not calculate ML, SHAP, or risk.
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+Open [http://127.0.0.1:5173](http://127.0.0.1:5173) with the backend running. Empty databases show zeros and empty-state copy, not demo numbers.
+
+Optional labeled demo rows (`status=demo`, no fabricated SHAP):
+
+```powershell
+python -m scripts.seed_demo_data
+```
+
+See `frontend/README.md`.
+
 ## Testing
 
 From the project root, with the virtual environment active:
 
 ```powershell
 pytest -q
+cd frontend
+npm test
 ```
 
 ### Manual demonstration

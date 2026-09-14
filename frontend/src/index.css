@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #070b14;
+  color: #e2e8f0;
+}
+
+@layer components {
+  .panel {
+    @apply rounded border border-soc-border bg-soc-panel;
+  }
+  .badge-normal {
+    @apply inline-flex rounded px-2 py-0.5 text-xs font-semibold uppercase tracking-wide bg-emerald-950 text-emerald-300 border border-emerald-800;
+  }
+  .badge-suspicious {
+    @apply inline-flex rounded px-2 py-0.5 text-xs font-semibold uppercase tracking-wide bg-amber-950 text-amber-300 border border-amber-800;
+  }
+  .badge-malicious {
+    @apply inline-flex rounded px-2 py-0.5 text-xs font-semibold uppercase tracking-wide bg-red-950 text-red-300 border border-red-800;
+  }
+  .badge-low {
+    @apply inline-flex rounded px-2 py-0.5 text-xs font-semibold uppercase tracking-wide bg-slate-800 text-slate-200 border border-slate-600;
+  }
+  .badge-medium {
+    @apply inline-flex rounded px-2 py-0.5 text-xs font-semibold uppercase tracking-wide bg-amber-950 text-amber-200 border border-amber-800;
+  }
+  .badge-high {
+    @apply inline-flex rounded px-2 py-0.5 text-xs font-semibold uppercase tracking-wide bg-orange-950 text-orange-200 border border-orange-800;
+  }
+  .badge-critical {
+    @apply inline-flex rounded px-2 py-0.5 text-xs font-semibold uppercase tracking-wide bg-red-950 text-red-200 border border-red-700;
+  }
+  .badge-neutral {
+    @apply inline-flex rounded px-2 py-0.5 text-xs font-semibold uppercase tracking-wide bg-slate-900 text-slate-300 border border-slate-700;
+  }
+}
